@@ -33,6 +33,7 @@ import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.util.Properties;
+import org.wisdom.maven.node.NPM;
 
 /**
  * Mojo preparing the Wisdom runtime.
@@ -151,6 +152,11 @@ public class InitializeMojo extends AbstractWisdomMojo {
             getNodeManager().installIfNotInstalled();
         } catch (IOException e) {
             getLog().error("Cannot install node and npm - asset processing won't work", e);
+        }
+        
+        // Configure NPM registry
+        if (npmRegistryRootUrl != null) {
+            NPM.configureRegistry(getNodeManager(), getLog(), npmRegistryRootUrl);
         }
 
         // Prepare OSGi packaging

@@ -159,14 +159,14 @@ public final class NPM {
         log.info("Executing " + cmdLine.toString() + " from " + executor.getWorkingDirectory().getAbsolutePath());
 
         try {
-            return executor.execute(cmdLine, extendEnvironmentWithNodeInPath());
+            return executor.execute(cmdLine, extendEnvironmentWithNodeInPath(node));
         } catch (IOException e) {
             throw new MojoExecutionException("Error during the execution of the NPM " + npmName, e);
         }
 
     }
 
-    private Map<String, String> extendEnvironmentWithNodeInPath() throws IOException {
+    private static Map<String, String> extendEnvironmentWithNodeInPath(NodeManager node) throws IOException {
         Map<String, String> env = EnvironmentUtils.getProcEnvironment();
         if (env.containsKey("PATH")) {
             String path = env.get("PATH");
@@ -224,7 +224,7 @@ public final class NPM {
         log.info("Executing " + cmdLine.toString() + " from " + executor.getWorkingDirectory().getAbsolutePath());
 
         try {
-            return executor.execute(cmdLine, extendEnvironmentWithNodeInPath());
+            return executor.execute(cmdLine, extendEnvironmentWithNodeInPath(node));
         } catch (IOException e) {
             throw new MojoExecutionException("Error during the execution of the NPM " + npmName, e);
         }
@@ -305,35 +305,6 @@ public final class NPM {
         return new File(node.getNodeModulesDirectory(), npmName);
     }
     
-    private void configure( String npmRegistryUrl ) {
-        
-        CommandLine cmdLine = new CommandLine(node.getNodeExecutable());
-        File npmCli = new File(node.getNodeModulesDirectory(), "npm/bin/npm-cli.js");
-        // NPM is launched using the main file, also disable the auto-quoting
-        cmdLine.addArgument(npmCli.getAbsolutePath(), false);
-        cmdLine.addArgument("config");
-        cmdLine.addArgument("set");
-        cmdLine.addArgument("registry");
-        cmdLine.addArguments(npmRegistryUrl);
-
-        DefaultExecutor executor = new DefaultExecutor();
-        executor.setExitValue(0);
-
-        PumpStreamHandler streamHandler = new PumpStreamHandler(
-                new LoggedOutputStream(log, false),
-                new LoggedOutputStream(log, true));
-
-        executor.setStreamHandler(streamHandler);
-
-        log.info("Executing " + cmdLine.toString());
-
-        try {
-            executor.execute(cmdLine, extendEnvironmentWithNodeInPath());
-        } catch (IOException e) {
-            log.error("Error during the configuration of NPM registry with the url " + npmRegistryUrl + " - check log", e);
-        }        
-    }
-
     private void install() {
         File directory = getNPMDirectory();
         if (directory.isDirectory()) {
@@ -390,7 +361,7 @@ public final class NPM {
         log.info("Executing " + cmdLine.toString());
 
         try {
-            executor.execute(cmdLine, extendEnvironmentWithNodeInPath());
+            executor.execute(cmdLine, extendEnvironmentWithNodeInPath(node));
         } catch (IOException e) {
             log.error("Error during the installation of the NPM " + npmName + " - check log", e);
         }
@@ -437,12 +408,37 @@ public final class NPM {
      */
     public static NPM npm(AbstractWisdomMojo mojo, String name, String version, String... args) {
         NPM npm = new NPM(mojo.getLog(), mojo.getNodeManager(), name, version, args);
-        String npmRegistryUrl = mojo.getNpmRegistryRootUrl();
-        if ( npmRegistryUrl != null && !npmRegistryUrl.equals(Constants.NPM_DIST_ROOT_URL) ) {
-            npm.configure( mojo.getNpmRegistryRootUrl() );
-        }
         npm.install();
         return npm;
+    }
+
+    public static void configureRegistry(NodeManager node, Log log, String npmRegistryUrl) {
+        
+        CommandLine cmdLine = new CommandLine(node.getNodeExecutable());
+        File npmCli = new File(node.getNodeModulesDirectory(), "npm/bin/npm-cli.js");
+        // NPM is launched using the main file, also disable the auto-quoting
+        cmdLine.addArgument(npmCli.getAbsolutePath(), false);
+        cmdLine.addArgument("config");
+        cmdLine.addArgument("set");
+        cmdLine.addArgument("registry");
+        cmdLine.addArguments(npmRegistryUrl);
+
+        DefaultExecutor executor = new DefaultExecutor();
+        executor.setExitValue(0);
+
+        PumpStreamHandler streamHandler = new PumpStreamHandler(
+                new LoggedOutputStream(log, false),
+                new LoggedOutputStream(log, true));
+
+        executor.setStreamHandler(streamHandler);
+
+        log.info("Configuring npm registry by executing " + cmdLine.toString());
+
+        try {
+            executor.execute(cmdLine, extendEnvironmentWithNodeInPath(node));
+        } catch (IOException e) {
+            log.error("Error during the configuration of NPM registry with the url " + npmRegistryUrl + " - check log", e);
+        }        
     }
 
     @Override
