@@ -36,6 +36,7 @@ import java.io.File;
 import java.io.FileReader;
 import java.io.IOException;
 import java.util.Map;
+import org.wisdom.maven.Constants;
 
 /**
  * Manages an execution of NPM.
@@ -112,7 +113,7 @@ public final class NPM {
      *     </pre>
      * </code>
      *
-     * we have to alternatives: 'coffee' and 'cake'.
+     * we have two alternatives: 'coffee' and 'cake'.
      *
      * @param binary the key of the binary to invoke
      * @param args   the arguments
@@ -303,6 +304,35 @@ public final class NPM {
     private File getNPMDirectory() {
         return new File(node.getNodeModulesDirectory(), npmName);
     }
+    
+    private void configure( String npmRegistryUrl ) {
+        
+        CommandLine cmdLine = new CommandLine(node.getNodeExecutable());
+        File npmCli = new File(node.getNodeModulesDirectory(), "npm/bin/npm-cli.js");
+        // NPM is launched using the main file, also disable the auto-quoting
+        cmdLine.addArgument(npmCli.getAbsolutePath(), false);
+        cmdLine.addArgument("config");
+        cmdLine.addArgument("set");
+        cmdLine.addArgument("registry");
+        cmdLine.addArguments(npmRegistryUrl);
+
+        DefaultExecutor executor = new DefaultExecutor();
+        executor.setExitValue(0);
+
+        PumpStreamHandler streamHandler = new PumpStreamHandler(
+                new LoggedOutputStream(log, false),
+                new LoggedOutputStream(log, true));
+
+        executor.setStreamHandler(streamHandler);
+
+        log.info("Executing " + cmdLine.toString());
+
+        try {
+            executor.execute(cmdLine, extendEnvironmentWithNodeInPath());
+        } catch (IOException e) {
+            log.error("Error during the configuration of NPM registry with the url " + npmRegistryUrl + " - check log", e);
+        }        
+    }
 
     private void install() {
         File directory = getNPMDirectory();
@@ -407,6 +437,10 @@ public final class NPM {
      */
     public static NPM npm(AbstractWisdomMojo mojo, String name, String version, String... args) {
         NPM npm = new NPM(mojo.getLog(), mojo.getNodeManager(), name, version, args);
+        String npmRegistryUrl = mojo.getNpmRegistryRootUrl();
+        if ( npmRegistryUrl != null && !npmRegistryUrl.equals(Constants.NPM_DIST_ROOT_URL) ) {
+            npm.configure( mojo.getNpmRegistryRootUrl() );
+        }
         npm.install();
         return npm;
     }
