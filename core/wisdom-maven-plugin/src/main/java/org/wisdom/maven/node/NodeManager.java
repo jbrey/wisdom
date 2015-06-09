@@ -40,7 +40,7 @@ import java.net.URL;
 public class NodeManager {
 
     private static final String NODE_VERSION_PREFIX = "v";
-    private static final String NPM_VERSION_PATTERN = "-/npm-%1$s.tgz";
+    private static final String NPM_VERSION_PATTERN = "npm/-/npm-%1$s.tgz";
     private final Log log;
     private final File nodeDirectory;
     private final File npmDirectory;
@@ -118,14 +118,16 @@ public class NodeManager {
 
     private String getNodeDist() {
         if (this.nodeDist == null) {
-    		this.nodeDist = mojo.getNodeDistributionRootUrl() + NODE_VERSION_PREFIX;
+            String configUrl = mojo.getNodeDistributionRootUrl();
+    		this.nodeDist = configUrl + (configUrl.endsWith("/")?"":"/") + NODE_VERSION_PREFIX;
         }
         return this.nodeDist;
     }
     
     private String getNpmDist() {
         if (this.npmDist == null) {
-            this.npmDist = mojo.getNpmRegistryRootUrl() + NPM_VERSION_PATTERN;
+            String configUrl = mojo.getNpmRegistryRootUrl();
+            this.npmDist = configUrl + (configUrl.endsWith("/")?"":"/") + NPM_VERSION_PATTERN;
         }
 		return this.npmDist;
     }

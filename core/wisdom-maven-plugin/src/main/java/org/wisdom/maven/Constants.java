@@ -50,7 +50,7 @@ public interface Constants {
     public static final String TEST_RESOURCES_DIR = "src/test/resources";
 
     public static final String NODE_DIST_ROOT_URL = "http://nodejs.org/dist/";
-    public static final String NPM_DIST_ROOT_URL = "https://registry.npmjs.org/npm/";
+    public static final String NPM_REGISTRY_ROOT_URL = "https://registry.npmjs.org/";
     public static final String NODE_VERSION = "0.12.4";
     public static final String NODE_VERSION_ARM = "0.10.26";
     public static final String NPM_VERSION = "2.5.1";

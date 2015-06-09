@@ -154,11 +154,9 @@ public class InitializeMojo extends AbstractWisdomMojo {
             getLog().error("Cannot install node and npm - asset processing won't work", e);
         }
         
-        // Configure NPM registry
-        if (npmRegistryRootUrl != null) {
-            NPM.configureRegistry(getNodeManager(), getLog(), npmRegistryRootUrl);
-        }
-
+        // Configure NPM registry 
+        NPM.configureRegistry(getNodeManager(), getLog(), (npmRegistryRootUrl==null?Constants.NPM_REGISTRY_ROOT_URL:npmRegistryRootUrl));
+        
         // Prepare OSGi packaging
         try {
             Properties properties = MavenUtils.getDefaultProperties(project);

@@ -158,35 +158,35 @@ public abstract class AbstractWisdomMojo extends AbstractMojo {
      * @return the root url used to download the node distribution.
      */
     public String getNodeDistributionRootUrl() {
-        
+        String ret = nodeDistributionRootUrl;
         if (nodeDistributionRootUrl == null) {
-            nodeDistributionRootUrl = Constants.NODE_DIST_ROOT_URL;
+            ret = Constants.NODE_DIST_ROOT_URL;
         }
         
-        return nodeDistributionRootUrl;
+        return ret;
     }
 	
     /**
      * The root url of the npm registry.
-     * Default value is 'https://registry.npmjs.org/npm/'.
+     * Default value is 'https://registry.npmjs.org/'.
      */
     @Parameter(defaultValue="${npmRegistryRootUrl}")
     protected String npmRegistryRootUrl;
 
     /**
-     * Gets the root url of the npm registry. Default value is 'https://registry.npmjs.org/npm/' except if the
+     * Gets the root url of the npm registry. Default value is 'https://registry.npmjs.org/' except if the
      * {@link #npmRegistryRootUrl} parameter is configured. In this case,
      * it returns the url specified by this parameter.
      *
      * @return the root url of the npm registry.
      */
     public String getNpmRegistryRootUrl() {
-        
+        String ret = npmRegistryRootUrl;
         if (npmRegistryRootUrl == null) {
-            npmRegistryRootUrl = Constants.NPM_DIST_ROOT_URL;
+            ret = Constants.NPM_REGISTRY_ROOT_URL;
         }
         
-        return npmRegistryRootUrl;
+        return ret;
     }
 	    
     
